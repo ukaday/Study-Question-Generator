@@ -36,7 +36,7 @@ class Window:
         # question amount entry
         validation = self.root.register(self.question_amount_entry_validation)
         self.question_amount_entry = tk.Entry(self.root, width=5, font=('Calibri', 14), validate='key',
-                                              validatecommand=(validation, '%S'))
+                                              validatecommand=(validation, '%S', '%d'))
         self.question_amount_entry.grid(row=1, column=1, sticky=tk.SW)
         self.question_amount_label = tk.Label(self.root, font=('Calibri', 14, 'bold'), text="Question Amount:")
         self.question_amount_label.grid(row=1, column=0, sticky=tk.SE)
@@ -56,7 +56,17 @@ class Window:
     def get_question_amount(self):
         return self.question_amount_entry.get()
 
-    def question_amount_entry_validation(self, string):
+    def question_amount_entry_validation(self, string, operation):
+        
+        # checks user backspace (allowed)
+        if operation == '0':
+            return True
+
+        # checks if user types more than 2 digits (not allowed)
+        if len(self.get_question_amount() + string) > 2:
+            return False
+
+        # checks if user types non-digit characters (not allowed)
         try:
             int(string)
             return True
