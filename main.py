@@ -1,7 +1,8 @@
 import requests
 import json
+import window
 
-api_key = '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'
+openai_api_key = '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'
 URL = "https://api.openai.com/v1/chat/completions"
 
 payload = {
@@ -17,7 +18,7 @@ payload = {
 
 headers = {
     "Content-Type": "application/json",
-    "Authorization": f"Bearer {api_key}"
+    "Authorization": f"Bearer {openai_api_key}"
 }
 
 
@@ -49,4 +50,5 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    window = window.Window()
+    window.start()
