@@ -5,7 +5,7 @@ import json
 class GPTReceiver:
     def __init__(self):
         # gpt variables
-        self.openai_api_key = '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'
+        self.openai_api_key = ''
         self.URL = "https://api.openai.com/v1/chat/completions"
         self.payload = {
             "model": "gpt-3.5-turbo",
@@ -27,6 +27,7 @@ class GPTReceiver:
         self.current_response_status = None
 
     def post_message(self, message):
+
         # adds user input to message history and sends
         self.payload["messages"].append({"role": "user", "content": f"{message}"})
         response = requests.post(self.URL, headers=self.headers, json=self.payload, stream=False)
@@ -69,3 +70,7 @@ class GPTReceiver:
 
         # returns response token amount
         return self.current_response_data['usage']['total_tokens']
+
+    def set_api_key(self, key):
+        self.openai_api_key = str(key)
+        self.headers['Authorization'] = f"Bearer {self.openai_api_key}"
