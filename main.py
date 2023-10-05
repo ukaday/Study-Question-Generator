@@ -1,6 +1,5 @@
 import gpt_receiver
 import window
-from tkinter import filedialog
 
 
 def submit_message(gpt, win):
@@ -36,15 +35,7 @@ def setup(gpt, win):
     win.start()
 
 
-def main(gpt, win):
-    running = True
-    while running:
-        continue
-
-
 if __name__ == '__main__':
     gpt_receiver = gpt_receiver.GPTReceiver()
     window = window.Window()
     setup(gpt_receiver, window)
-
-    # main(gpt_receiver, window)

@@ -25,7 +25,7 @@ class Window:
         self.root.grid_columnconfigure(0, weight=1)
 
         # response box
-        self.response_text_box = tk.Text(self.root, font=('Calibri', 16), width=80, height=10, padx=5, pady=5,
+        self.response_text_box = tk.Text(self.root, font=('Calibre', 14), width=80, height=10, padx=5, pady=5,
                                          wrap='word', state='disabled')
         self.response_text_box.grid(row=3, column=0, columnspan=3, padx=10, pady=10, sticky=tk.S)
 
@@ -35,30 +35,30 @@ class Window:
         self.response_text_box.config(yscrollcommand=self.scrollbar.set)
 
         # message box
-        self.message_text_box = tk.Text(self.root, font=('Calibri', 16), width=40, height=10, padx=5, pady=5,
+        self.message_text_box = tk.Text(self.root, font=('Calibre', 14), width=40, height=10, padx=5, pady=5,
                                         wrap='word')
         self.message_text_box.grid(row=0, column=2, rowspan=2, columnspan=2, padx=10, pady=10, sticky=tk.NE)
 
         # question amount entry
         validation = self.root.register(self.question_amount_entry_validation)
-        self.question_amount_entry = tk.Entry(self.root, width=5, font=('Calibri', 14), validate='key',
+        self.question_amount_entry = tk.Entry(self.root, width=5, font=('Calibre', 12), validate='key',
                                               validatecommand=(validation, '%S', '%d'))
         self.question_amount_entry.grid(row=1, column=1, sticky=tk.SW)
-        self.question_amount_label = tk.Label(self.root, font=('Calibri', 14, 'bold'), text="Question Amount:")
+        self.question_amount_label = tk.Label(self.root, font=('Calibre', 12, 'bold'), text="Question Amount:")
         self.question_amount_label.grid(row=1, column=0, sticky=tk.SE)
         self.question_amount_entry.bind('<Return>', self.set_question_amount)
 
         # API key entry
-        self.api_key_entry = tk.Entry(self.root, width=20, font=('Calibri', 14))
+        self.api_key_entry = tk.Entry(self.root, width=20, font=('Calibre', 12))
         self.api_key_entry.grid(row=0, column=1, sticky=tk.SW)
-        self.api_key_label = tk.Label(self.root, font=('Calibri', 14, 'bold'), text="OpenAI API Key:")
+        self.api_key_label = tk.Label(self.root, font=('Calibre', 12, 'bold'), text="OpenAI API Key:")
         self.api_key_label.grid(row=0, column=0, sticky=tk.SE)
         self.api_key_entry.bind('<Return>', self.set_api_key)
 
         # Tokens label
-        self.tokens_label = tk.Label(self.root, font=('Calibri', 14, 'bold'), text="Tokens used:")
+        self.tokens_label = tk.Label(self.root, font=('Calibre', 12, 'bold'), text="Tokens used:")
         self.tokens_label.grid(row=2, column=0, sticky=tk.SE)
-        self.tokens_amount_label = tk.Label(self.root, font=('Calibri', 14, 'bold'), text="0")
+        self.tokens_amount_label = tk.Label(self.root, font=('Calibre', 12, 'bold'), text="0")
         self.tokens_amount_label.grid(row=2, column=1, sticky=tk.SW)
 
 
