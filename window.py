@@ -34,10 +34,9 @@ class Window:
         self.scrollbar.place(in_=self.response_text_box, relx=1.0, rely=-.01, relheight=1.0)
         self.response_text_box.config(yscrollcommand=self.scrollbar.set)
 
-        # message box
-        self.message_text_box = tk.Text(self.root, font=('Calibre', 14), width=40, height=10, padx=5, pady=5,
-                                        wrap='word')
-        self.message_text_box.grid(row=0, column=2, rowspan=2, columnspan=2, padx=10, pady=10, sticky=tk.NE)
+        # upload file button
+        self.upload_file_button = tk.Button(self.root, text="Upload File", font=('Calibre', 12), height=2, width=15)
+        self.upload_file_button.grid(row=0, column=2, rowspan=2, padx=200, sticky=tk.S)
 
         # question amount entry
         validation = self.root.register(self.question_amount_entry_validation)

@@ -1,5 +1,7 @@
 import gpt_receiver
 import window
+from file_handler import FileHandler
+from tkinter import filedialog
 
 
 def submit_message(gpt, win):
@@ -30,8 +32,24 @@ def submit_message(gpt, win):
     win.set_tokens_used_label(gpt.get_response_tokens())
 
 
+def create_file_object():
+    # asks user for file, specifies PDF and Text files
+    file_path = filedialog.askopenfilename(
+        title="Select a File",
+        filetypes=(("PDF files", "*.pdf"), ("Text files", "*.txt"))
+    )
+
+    # checks for valid file_path
+    if not file_path:
+        print("Error: No file path")
+        return None
+
+    file_handler = FileHandler(file_path)
+    print(file_handler.get_text())
+
+
 def setup(gpt, win):
-    win.message_text_box.bind('<Alt_L>', lambda event: submit_message(gpt, win))
+    win.upload_file_button.config(command=create_file_object)
     win.start()
 
 
