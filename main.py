@@ -3,36 +3,19 @@ import window
 from file_handler import FileHandler
 from tkinter import filedialog
 
+# updates window api_key outside of window class
+# because the GPTReceiver's api key is updated
+# on the <Return> event bound to the api_key_entry.
 
-def submit_message(gpt, win):
-
-    # indicates to user that their request is processing
-    win.set_response_text("Streaming Response...")
-
-    # updates gpt api key incase user input new api key in window
+# the window question_amount is still
+# updated inside window class however
+def set_api_key(gpt, win):
+    win.update_api_key()
     gpt.set_api_key(win.get_api_key())
-
-    # checks if api key has been entered, then updates api keys
-    if gpt.openai_api_key == '':
-        win.set_response_text("Please enter an API key.")
-        return
-
-    # checks if post is successful
-    if not gpt.post_message(win.get_message_text()):
-        win.set_response_text("Error: " + str(gpt.get_status()[1]))
-        return
-
-    # updates UI response box
-    win.clear_message_text()
-    response_message = gpt.get_response_message()
-    if response_message:
-        win.set_response_text(response_message)
-
-    # updates UI token display
-    win.set_tokens_used_label(gpt.get_response_tokens())
+    win.set_response_text("The API key was updated.")
 
 
-def create_file_object():
+def create_file_handler():
     # asks user for file, specifies PDF and Text files
     file_path = filedialog.askopenfilename(
         title="Select a File",
@@ -41,15 +24,67 @@ def create_file_object():
 
     # checks for valid file_path
     if not file_path:
-        print("Error: No file path")
         return None
 
-    file_handler = FileHandler(file_path)
-    print(file_handler.get_text())
+    return FileHandler(file_path)
+
+
+def submit_file(gpt, win):
+    file_handler = create_file_handler()
+
+    # checks if there is a file handler object
+    if not file_handler:
+        win.set_response_text("Error: The file path was invalid.")
+        win.file_uploaded = False
+        return
+
+    # checks if there are file contents
+    if file_handler.get_text() != "":
+
+        # clears GPT history so previous texts/questions don't affect new file question generation
+        gpt.clear_message_history()
+        win.set_response_text("Uploading file to GPT...")
+
+        # sends file text to GPT, checks if successful
+        if gpt.post_message(f"Remember this text: {file_handler.get_text()} \n\nPlease respond with one word."):
+            win.set_response_text("File successfully uploaded.")
+            win.set_tokens_used_label(gpt.get_response_tokens())
+            win.file_uploaded = True
+            return
+
+        win.set_response_text("Error: File upload was unsuccessful. " + str(gpt.get_status()))
+        win.file_uploaded = False
+        return
+
+    win.set_response_text("Error: There were no file contents to upload.")
+    win.file_uploaded = False
+
+
+def generate_questions(gpt, win):
+
+    # checks if the GPTReceiver has text to work with
+    if not win.file_uploaded:
+        return
+
+    win.clear_response_text()
+
+    # generates new questions and adds them to the response box
+    for i in range(win.get_question_amount()):
+        post = gpt.post_message(
+            "Write a new study question regarding the text. Please only respond with the question. " +
+            "Also be sure that the new question is not a repeat of a previously generated question."
+        )
+        if post:
+            win.add_response_text(str(i + 1) + ". " + gpt.get_response_message() + "\n")
+        else:
+            win.add_response_text("Error: Could not receive the response.")
+            break
 
 
 def setup(gpt, win):
-    win.upload_file_button.config(command=create_file_object)
+    win.upload_file_button.config(command=lambda: submit_file(gpt, win))
+    win.generate_button.config(command=lambda: generate_questions(gpt, win))
+    win.api_key_entry.bind('<Return>', lambda event: set_api_key(gpt, win))
     win.start()
 
 

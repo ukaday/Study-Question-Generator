@@ -18,6 +18,7 @@ class Window:
         # class variables
         self.question_amount = 0
         self.api_key = ""
+        self.file_uploaded = False
 
     def setup_widgets(self):
         # constant GUI and stretchability
@@ -36,7 +37,11 @@ class Window:
 
         # upload file button
         self.upload_file_button = tk.Button(self.root, text="Upload File", font=('Calibre', 12), height=2, width=15)
-        self.upload_file_button.grid(row=0, column=2, rowspan=2, padx=200, sticky=tk.S)
+        self.upload_file_button.grid(row=0, column=2, padx=200, sticky=tk.S)
+
+        # generate questions button
+        self.generate_button = tk.Button(self.root, text="Generate", font=('Calibre', 12), height=2, width=15)
+        self.generate_button.grid(row=1, column=2, rowspan=2, pady=10, sticky=tk.S)
 
         # question amount entry
         validation = self.root.register(self.question_amount_entry_validation)
@@ -52,7 +57,6 @@ class Window:
         self.api_key_entry.grid(row=0, column=1, sticky=tk.SW)
         self.api_key_label = tk.Label(self.root, font=('Calibre', 12, 'bold'), text="OpenAI API Key:")
         self.api_key_label.grid(row=0, column=0, sticky=tk.SE)
-        self.api_key_entry.bind('<Return>', self.set_api_key)
 
         # Tokens label
         self.tokens_label = tk.Label(self.root, font=('Calibre', 12, 'bold'), text="Tokens used:")
@@ -71,24 +75,26 @@ class Window:
     def on_close(self):
         sys.exit()
 
-    def get_message_text(self):
-        return self.message_text_box.get("1.0", "end-1c")
-
-    def clear_message_text(self):
-        # clears text box
-        self.message_text_box.delete("1.0", "end-1c")
-
     def set_response_text(self, text):
-        # unfreezes text box and adds text
+        # unfreezes text box and replaces text
         self.response_text_box.config(state='normal')
-        self.clear_response_text()
+        self.response_text_box.delete("1.0", "end-1c")
+        self.response_text_box.insert(tk.END, text)
+        self.response_text_box.config(state='disabled')
+        self.root.update_idletasks()
+
+    def add_response_text(self, text):
+        # unfreezes text box and adds to existing text
+        self.response_text_box.config(state='normal')
         self.response_text_box.insert(tk.END, text)
         self.response_text_box.config(state='disabled')
         self.root.update_idletasks()
 
     def clear_response_text(self):
         # clears text box
+        self.response_text_box.config(state='normal')
         self.response_text_box.delete("1.0", "end-1c")
+        self.response_text_box.config(state='disabled')
 
     def set_question_amount(self, event):
         value = self.question_amount_entry.get()
@@ -96,9 +102,13 @@ class Window:
         # checks if entry is empty
         if value != "":
             self.question_amount = int(value)
+            self.set_response_text("Question amount was updated.")
 
-        # clears entry
-        self.question_amount_entry.delete(0, tk.END)
+            # clears entry
+            self.question_amount_entry.delete(0, tk.END)
+            return
+
+        self.set_response_text("Question amount could not be updated.")
 
     def get_question_amount(self):
         return self.question_amount
@@ -120,7 +130,7 @@ class Window:
         except:
             return False
 
-    def set_api_key(self, event):
+    def update_api_key(self):
         value = self.api_key_entry.get()
 
         # checks if entry is empty

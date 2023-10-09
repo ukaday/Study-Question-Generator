@@ -44,6 +44,9 @@ class GPTReceiver:
         # True denotes that the post was successful
         return True
 
+    def clear_message_history(self):
+        self.payload['messages'] = []
+
     def get_status(self):
         # checks if status isn't successful
         if self.current_response_status != 200:
