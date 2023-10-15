@@ -2,9 +2,11 @@ import gpt_receiver
 import window
 from file_handler import FileHandler
 from tkinter import filedialog
+import threading
+
 
 # updates window api_key outside of window class
-# because the GPTReceiver's api key is updated
+# because the GPTReceiver's api_key is updated
 # on the <Return> event bound to the api_key_entry.
 
 # the window question_amount is still
@@ -19,14 +21,25 @@ def create_file_handler():
     # asks user for file, specifies PDF and Text files
     file_path = filedialog.askopenfilename(
         title="Select a File",
-        filetypes=(("PDF files", "*.pdf"), ("Text files", "*.txt"))
+        filetypes=(("PDF files", "*.pdf"), ("Text files", "*.txt")),
     )
 
     # checks for valid file_path
     if not file_path:
         return None
 
-    return FileHandler(file_path)
+    try:
+        return FileHandler(file_path)
+    except Exception as e:
+        print(f"Error while creating FileHandler: {e}")
+        return None
+
+
+def break_up_string(string, size):
+    while string != "":
+        temp_string = string[0:size]
+        string = string[size:]
+        yield temp_string
 
 
 def submit_file(gpt, win):
@@ -39,25 +52,32 @@ def submit_file(gpt, win):
         return
 
     # checks if there are file contents
-    if file_handler.get_text() != "":
+    if file_handler.get_text() == "":
+        win.set_response_text("Error: There were no file contents to upload.")
+        win.file_uploaded = False
 
-        # clears GPT history so previous texts/questions don't affect new file question generation
-        gpt.clear_message_history()
-        win.set_response_text("Uploading file to GPT...")
+    # clears GPT history so previous texts/questions don't affect new file question generation
+    gpt.clear_message_history()
+    win.set_response_text("Uploading file to GPT...")
 
-        # sends file text to GPT, checks if successful
-        if gpt.post_message(f"Remember this text: {file_handler.get_text()} \n\nPlease respond with one word."):
-            win.set_response_text("File successfully uploaded.")
-            win.set_tokens_used_label(gpt.get_response_tokens())
-            win.file_uploaded = True
+    # sends file to gpt in parts to avoid token limits
+    for text in break_up_string(file_handler.get_text(), 6000):
+
+        # sends  text to GPT, checks if successful
+        if not gpt.post_message(f"Remember this text: {text} \n\nPlease respond with one word."):
+            win.set_response_text("Error: File upload was unsuccessful. " + str(gpt.get_status()))
+            win.file_uploaded = False
             return
 
-        win.set_response_text("Error: File upload was unsuccessful. " + str(gpt.get_status()))
-        win.file_uploaded = False
-        return
+        win.set_tokens_used_label(gpt.get_response_tokens())
+        win.file_uploaded = True
 
-    win.set_response_text("Error: There were no file contents to upload.")
-    win.file_uploaded = False
+    win.set_response_text("File successfully uploaded.")
+
+
+def start_submit_file(gpt, win):
+    # separate thread for GPT api
+    threading.Thread(target=submit_file, args=(gpt, win), daemon=True).start()
 
 
 def generate_questions(gpt, win):
@@ -81,9 +101,14 @@ def generate_questions(gpt, win):
             break
 
 
+def start_generate_questions(gpt, win):
+    # separate thread for GPT api
+    threading.Thread(target=generate_questions, args=(gpt, win), daemon=True).start()
+
+
 def setup(gpt, win):
-    win.upload_file_button.config(command=lambda: submit_file(gpt, win))
-    win.generate_button.config(command=lambda: generate_questions(gpt, win))
+    win.upload_file_button.config(command=lambda: start_submit_file(gpt, win))
+    win.generate_button.config(command=lambda: start_generate_questions(gpt, win))
     win.api_key_entry.bind('<Return>', lambda event: set_api_key(gpt, win))
     win.start()
 

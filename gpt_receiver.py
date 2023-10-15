@@ -32,6 +32,8 @@ class GPTReceiver:
         self.payload["messages"].append({"role": "user", "content": f"{message}"})
         response = requests.post(self.URL, headers=self.headers, json=self.payload, stream=False)
 
+        print(self.payload["messages"])
+
         # checks if response was successful
         if response.status_code != 200:
             self.current_response_status = response.status_code
