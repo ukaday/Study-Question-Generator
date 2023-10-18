@@ -35,13 +35,6 @@ def create_file_handler():
         return None
 
 
-def break_up_string(string, size):
-    while string != "":
-        temp_string = string[0:size]
-        string = string[size:]
-        yield temp_string
-
-
 def submit_file(gpt, win):
     file_handler = create_file_handler()
 
@@ -60,17 +53,14 @@ def submit_file(gpt, win):
     gpt.clear_message_history()
     win.set_response_text("Uploading file to GPT...")
 
-    # sends file to gpt in parts to avoid token limits
-    for text in break_up_string(file_handler.get_text(), 6000):
+    # sends  text to GPT, checks if successful
+    if not gpt.post_message(f"Remember this text: {file_handler.get_text()} \n\nPlease respond with one word."):
+        win.set_response_text("Error: File upload was unsuccessful. " + str(gpt.get_status()))
+        win.file_uploaded = False
+        return
 
-        # sends  text to GPT, checks if successful
-        if not gpt.post_message(f"Remember this text: {text} \n\nPlease respond with one word."):
-            win.set_response_text("Error: File upload was unsuccessful. " + str(gpt.get_status()))
-            win.file_uploaded = False
-            return
-
-        win.set_tokens_used_label(gpt.get_response_tokens())
-        win.file_uploaded = True
+    win.set_tokens_used_label(gpt.get_response_tokens())
+    win.file_uploaded = True
 
     win.set_response_text("File successfully uploaded.")
 
