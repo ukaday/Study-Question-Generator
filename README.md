@@ -20,9 +20,9 @@ Study Question Generator uses OpenAi's ChatGPT API to generate study questions b
 ### Installation
 * download all files into one folder
 * install PyPDF2
-'''
+```
 pip install PyPDF2
-'''
+```
 
 ### Executing Program
 * run 'main.py'
